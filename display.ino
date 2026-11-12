@@ -94,7 +94,8 @@ void displayDraw() {
    else lcd.print(PROFILES[currentProfile].name);
    lcd.print("          ");                            // Removes previous letters
    lcd.setCursor(0, 1);
-   lcd.print("Target ");
+   lcd.print(sysStatus.tempVal, 1);
+   lcd.print("/");
    lcd.print(setTemp, 1);
    lcd.print(" C     ");
   }
@@ -113,14 +114,14 @@ void displayDraw() {
    lcd.print("          ");
   }
   else if (screen == 3) {                              // Set Temperature Screen
-   lcd.print("Set temp: hold  ");
+   lcd.print("Set temp:       ");
    lcd.setCursor(0, 1);
    lcd.print("> ");
    lcd.print(editValue, 1);                            // 1 decimal place
    lcd.print(" C        ");
   }
   else if (screen == 4) {                              // Set Light Screen
-   lcd.print("Set light: hold ");
+   lcd.print("Set light:        ");
    lcd.setCursor(0, 1);
    lcd.print("> ");
    lcd.print((int)editValue);                          // whole number

@@ -1,47 +1,49 @@
-const int sensorPin = A0; // Light sensor on A0
+#include "settings.h"
+
+const int lightSensorPin = A0; // Light sensor on A0
 const int ledPin = 3;     // Relay/LED on D3
 const int threshold = 400;   // Light threshold
-int totalSeconds = 0; // stores running time counter
 
-void setup() {
+unsigned int sunlightSeconds = 0; // stores running time counter
+
+void lightSetup() {
   pinMode(ledPin, OUTPUT);
   Serial.begin(9600);
   Serial.println("System Ready.");
 }
 
-void loop() {
-  
-trackSunLight(totalSeconds);
-delay(1000);
-
-}
-
 // function parameters - tSeconds
 // returns nothing
-void trackSunLight(int& tSeconds){
+void trackSunlight(int& tSeconds) {
+  static int lastRun = millis();
+  if (millis() - lastRun < 1000) return;
+  lastRun = millis();
 
-int lightVal = analogRead(sensorPin);
-
-if (lightVal >= threshold){
-  digitalWrite(ledPin, LOW); //turn off LED/Relay
-  tSeconds++;
+  sysStatus.lightVal = analogRead(lightSensorPin);
+  if (sysStatus.lightVal < settings.darkThreshold) {
+    digitalWrite(ledPin, LOW); // turn on LED/Relay
+    tSeconds++;
+    }
+  else if (sysStatus.lightVal > settings.darkThreshold + 50) {
+    digitalWrite(ledPin, LOW); // turn off LED/Relay for plants
+  }
+  sysStatus.lightOn = digitalRead(ledPin);
 }
-else{
-  digitalWrite(ledPin, HIGH); //tur on LED/Relay for plants
-}
 
+int tSeconds;
 int h = tSeconds / 3600; //getting hours
 int m = tSeconds % 3600 / 60;  // getting minutes
 int s = tSeconds % 60; //getting seconds
 
 //printing light value and sunlight time
-Serial.print("Light: ");
-Serial.print(lightVal);
-Serial.print(" | Sunlight Time: ");
-Serial.print(h);
-Serial.print("h ");
-Serial.print(m);
-Serial.print("m ");
-Serial.print(s);
-Serial.println("s");
+void displayLight() {
+  Serial.print("Light: ");
+  Serial.print(sysStatus.lightVal);
+  Serial.print(" | Sunlight Time: ");
+  Serial.print(h);
+  Serial.print("h ");
+  Serial.print(m);
+  Serial.print("m ");
+  Serial.print(s);
+  Serial.println("s");
 }
