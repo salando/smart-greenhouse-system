@@ -14,20 +14,6 @@ const char* MENU_ITEMS[] = {"Profile", "Set Temp", "Light Level", "Back"};
 const int MENU_COUNT = 4;
 
 
-// Temporary Profile Settings array kind of
-struct Profile {
-  const char* name;
-  float temp;
-  int light;
-};
-
-const Profile PROFILES[] = {
-  {"Basil",   26.0, 400},
-  {"Lettuce", 20.0, 450},
-  {"Tomato",  27.0, 350},
-};
-const int PROFILE_COUNT = 3;
-
 // Variable States
 unsigned long lastDraw = 0;
 int screen = 0;                     // 0 Home, 1 Menu, 2 Pick profile, 3 Set temp, 4 Set light
@@ -168,13 +154,4 @@ int menuButtonEvent() {
     holdReported = true;
   }
   return result;
-}
-
-
-void setup() {
-  displaySetup();
-}
-
-void loop() {
-  displayUpdate();                            // FIXED: loop has to call this
 }
