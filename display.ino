@@ -1,11 +1,10 @@
 #include <Wire.h>
 #include "rgb_lcd.h"
-
+#include "settings.h"
 rgb_lcd lcd;
 
 
 // Pins
-const int BUTTON_PIN = D2;
 const int ROTARY_ANGLE_SENSOR = A2;
 const unsigned long BUTTON_HOLD_MS = 700;
 
@@ -19,8 +18,6 @@ unsigned long lastDraw = 0;
 int screen = 0;                     // 0 Home, 1 Menu, 2 Pick profile, 3 Set temp, 4 Set light
 int menuIndex = 0;
 int currentProfile = 0;             // Current Profile Selection
-double setTemp = PROFILES[0].temp;
-int darkThreshold = PROFILES[0].light;
 double editValue = 0;               // Shows the number when editing with the Rotary Angle Sensor
 
 void displaySetup() {
@@ -34,6 +31,8 @@ void displaySetup() {
 // Updates the display interal status and logic for setting variable values
 void displayUpdate() {
   int press = menuButtonEvent();
+  if (alarmOn) screen = 5;
+  else if (screen == 5) screen = 0;
 
   if (screen == 0) {
     if (press != 0) {
@@ -57,8 +56,8 @@ void displayUpdate() {
     if (press == 1) menuIndex = (menuIndex + 1) % PROFILE_COUNT;
     if (press == 2) {
       currentProfile = menuIndex;
-      setTemp = PROFILES[menuIndex].temp;
-      darkThreshold = PROFILES[menuIndex].light;
+      settings.setTemp = PROFILES[menuIndex].temp;
+      settings.darkThreshold = PROFILES[menuIndex].light;
       screen = 1;
       menuIndex = 0;
     }
@@ -66,7 +65,7 @@ void displayUpdate() {
   else if (screen == 3) {
     editValue = map(analogRead(ROTARY_ANGLE_SENSOR), 0, 1022, 70, 30) / 2.0; // Showing 15-35 degrees with 0.5 degree accuracy
     if (press == 2) {
-      setTemp = editValue;
+      settings.setTemp = editValue;
       currentProfile = -1;
       screen = 1;
       menuIndex = 1;
@@ -75,7 +74,7 @@ void displayUpdate() {
   else if (screen == 4) {
     editValue = map(analogRead(ROTARY_ANGLE_SENSOR), 0, 1022, 100, 0) * 10; // Light Threshold from 0-1000 with 10 increment
     if (press == 2) {
-      darkThreshold = editValue;
+      settings.darkThreshold = editValue;
       currentProfile = -1;
       screen = 1;
       menuIndex = 2;
@@ -89,43 +88,61 @@ void displayUpdate() {
 
 void displayDraw() {
   lcd.setCursor(0, 0);
+  if (screen != 5) {
+     if (ventWarning) lcd.setRGB(255, 150, 0);
+     else lcd.setRGB(0, 255, 0);
+   }
+  
   if (screen == 0) {
-   if (currentProfile == -1) lcd.print("Custom");
-   else lcd.print(PROFILES[currentProfile].name);
-   lcd.print("          ");                            // Removes previous letters
-   lcd.setCursor(0, 1);
-   lcd.print(sysStatus.tempVal, 1);
-   lcd.print("/");
-   lcd.print(setTemp, 1);
-   lcd.print(" C     ");
+    if (currentProfile == -1) lcd.print("Custom");
+    else lcd.print(PROFILES[currentProfile].name);
+    lcd.print("          ");                            // Removes previous letters
+    lcd.setCursor(0, 1);
+    lcd.print(sysStatus.tempVal, 1);
+    lcd.print("/");
+    lcd.print(settings.setTemp, 1);
+    lcd.print(" C     ");
   }
   else if (screen == 1) {                              // Menu Screen
-   lcd.print("MENU            ");
-   lcd.setCursor(0, 1);
-   lcd.print("> ");
-   lcd.print(MENU_ITEMS[menuIndex]);
-   lcd.print("          ");
+    lcd.print("MENU            ");
+    lcd.setCursor(0, 1);
+    lcd.print("> ");
+    lcd.print(MENU_ITEMS[menuIndex]);
+    lcd.print("          ");
   }
-  else if (screen == 2) {                              // Pick Profile Screen
-   lcd.print("Pick plant      ");
-   lcd.setCursor(0, 1);
-   lcd.print("> ");
-   lcd.print(PROFILES[menuIndex].name);
-   lcd.print("          ");
+  else if (screen == 2) {
+    lcd.print("Pick plant      ");
+    lcd.setCursor(0, 1);
+    lcd.print("> ");
+    lcd.print(PROFILES[menuIndex].name);
+    lcd.print("          ");
   }
   else if (screen == 3) {                              // Set Temperature Screen
-   lcd.print("Set temp:       ");
-   lcd.setCursor(0, 1);
-   lcd.print("> ");
-   lcd.print(editValue, 1);                            // 1 decimal place
-   lcd.print(" C        ");
+    lcd.print("Set temp:       ");
+    lcd.setCursor(0, 1);
+    lcd.print("> ");
+    lcd.print(editValue, 1);                            // 1 decimal place
+    lcd.print(" C        ");
   }
   else if (screen == 4) {                              // Set Light Screen
-   lcd.print("Set light:        ");
-   lcd.setCursor(0, 1);
-   lcd.print("> ");
-   lcd.print((int)editValue);                          // whole number
-   lcd.print("          ");
+    lcd.print("Set light:      ");
+    lcd.setCursor(0, 1);
+    lcd.print("> ");
+    lcd.print((int)editValue);                          // whole number
+    lcd.print("          ");
+  }
+  else if (screen == 5) {
+    lcd.setRGB(255, 0, 0);
+    lcd.setCursor(0, 0);
+    if (sensorError) {
+    lcd.print("SENSOR ERROR    ");
+    } else {
+      lcd.print("Temp: ");
+      lcd.print(temperature, 1);
+      lcd.print(" C    ");
+      }
+    lcd.setCursor(0, 1);
+    lcd.print(muted ? "ALARM - MUTED   " : "ALARM! Press btn");
   }
 
 }

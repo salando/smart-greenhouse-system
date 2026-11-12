@@ -1,6 +1,13 @@
 #pragma once
 #include <Arduino.h>
 
+bool ventWarning = false;
+bool alarmOn = false;
+bool muted = false;
+float temperature = 0;
+bool sensorError = false;
+const int BUTTON_PIN = D2;
+
 struct Profile {
   const char* name;
   float temp;
