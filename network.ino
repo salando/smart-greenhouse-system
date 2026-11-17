@@ -19,6 +19,7 @@ const unsigned long SEND_INTERVAL = 1000;
 
 
 void netSetup() {
+  WiFi.config(IPAddress(172, 20, 10, 9));
   WiFi.begin(SSID, PASS);
 
   Serial.print("Joining ");
