@@ -7,6 +7,7 @@ const int threshold = 400;   // Light threshold
 unsigned int sunlightSeconds = 0; // stores running time counter
 
 void lightSetup() {
+  sysStatus.lighttime = 0;
   pinMode(ledPin, OUTPUT);
   Serial.begin(9600);
   Serial.println("System Ready.");
@@ -14,7 +15,7 @@ void lightSetup() {
 
 // function parameters - tSeconds
 // returns nothing
-void trackSunlight(int& tSeconds) {
+void trackSunlight(int tSeconds) {
   static int lastRun = millis();
   if (millis() - lastRun < 1000) return;
   lastRun = millis();

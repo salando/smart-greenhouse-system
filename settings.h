@@ -24,6 +24,7 @@ struct Settings {
 struct Status {
   float tempVal;
   int lightVal;
+  unsigned int lighttime;
   bool fanOn;
   bool ventOpen;
   bool lightOn;
