@@ -1,7 +1,7 @@
 #include <WiFiS3.h>
 
-const char* SSID = "YOUR_HOTSPOT_NAME";
-const char* PASS = "YOUR_PASSWORD";
+const char* SSID = "YOUR_HOTSPOT_NAME"; // Input your hotspot name (CASE SENSITIVE)
+const char* PASS = "YOUR_PASSWORD"; // Input your hotspot password (CASE SENSITIVE)
 const int   PORT = 8080;
 
 struct GreenhouseState {
