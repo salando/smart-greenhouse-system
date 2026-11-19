@@ -89,8 +89,11 @@ void displayUpdate() {
 void displayDraw() {
   lcd.setCursor(0, 0);
   if (screen != 5) {
-     if (ventWarning) lcd.setRGB(255, 150, 0);
-     else lcd.setRGB(0, 255, 0);
+     if (ventWarning) {
+      lcd.setRGB(255, 150, 0);
+      
+      }
+      else lcd.setRGB(255, 255, 255);
    }
   
   if (screen == 0) {
@@ -98,10 +101,12 @@ void displayDraw() {
     else lcd.print(PROFILES[currentProfile].name);
     lcd.print("          ");                            // Removes previous letters
     lcd.setCursor(0, 1);
-    lcd.print(sysStatus.tempVal, 1);
+    lcd.print(sysStatus.tempVal, 0);
     lcd.print("/");
-    lcd.print(settings.setTemp, 1);
-    lcd.print(" C     ");
+    lcd.print(settings.setTemp, 0);
+    lcd.print("C  ");
+    lcd.print(sysStatus.lightVal);
+    lcd.print("    ");
   }
   else if (screen == 1) {                              // Menu Screen
     lcd.print("MENU            ");
