@@ -31,10 +31,32 @@ void displaySetup() {
 // Updates the display interal status and logic for setting variable values
 void displayUpdate() {
   int press = menuButtonEvent();
-  if (alarmOn) screen = 5;
-  else if (screen == 5) screen = 0;
+  static bool sensorDismissed = false;
+  static bool hotDismissed = false;
+  static bool coldDismissed = false;
 
-  if (screen == 0) {
+  if (!sysStatus.sensorError) {
+    sensorDismissed = false;
+    if (!sysStatus.ventWarning) hotDismissed = false;
+    if (sysStatus.tempVal >= 15) coldDismissed = false;
+  }
+
+  if (sysStatus.alarmOn) screen = 5;
+  else if (screen == 5) screen = 0;
+  else if (sysStatus.sensorError && !sensorDismissed) screen = 6;
+  else if (!sysStatus.sensorError && sysStatus.ventWarning && !hotDismissed) screen = 7;
+  else if (!sysStatus.sensorError && sysStatus.tempVal < 15 && !coldDismissed) screen = 8;
+  else if (screen >= 6) screen = 0;
+
+  if (screen >= 6) {
+    if (press != 0) {
+      if (screen == 6) sensorDismissed = true;
+      if (screen == 7) hotDismissed = true;
+      if (screen == 8) coldDismissed = true;
+      screen = 0;
+    }
+  }
+  else if (screen == 0) {
     if (press != 0) {
       screen = 1;
       menuIndex = 0;
@@ -88,14 +110,8 @@ void displayUpdate() {
 
 void displayDraw() {
   lcd.setCursor(0, 0);
-  if (screen != 5) {
-     if (ventWarning) {
-      lcd.setRGB(255, 150, 0);
-      
-      }
-      else lcd.setRGB(255, 255, 255);
-   }
-  
+  if (screen <= 4) lcd.setRGB(255, 255, 255);
+
   if (screen == 0) {
     if (currentProfile == -1) lcd.print("Custom");
     else lcd.print(PROFILES[currentProfile].name);
@@ -139,15 +155,37 @@ void displayDraw() {
   else if (screen == 5) {
     lcd.setRGB(255, 0, 0);
     lcd.setCursor(0, 0);
-    if (sensorError) {
+    if (sysStatus.sensorError) {
     lcd.print("SENSOR ERROR    ");
     } else {
       lcd.print("Temp: ");
-      lcd.print(temperature, 1);
+      lcd.print(sysStatus.tempVal, 1);
       lcd.print(" C    ");
       }
     lcd.setCursor(0, 1);
-    lcd.print(muted ? "ALARM - MUTED   " : "ALARM! Press btn");
+    lcd.print(sysStatus.alarmMuted ? "ALARM - MUTED   " : "ALARM! Press btn");
+  }
+  else if (screen == 6) {
+    lcd.setRGB(255, 0, 0);
+    lcd.print("SENSOR ERROR    ");
+    lcd.setCursor(0, 1);
+    lcd.print("Check temp cable");
+  }
+  else if (screen == 7) {
+    lcd.setRGB(255, 150, 0);
+    lcd.print("TOO HOT: ");
+    lcd.print(sysStatus.tempVal, 1);
+    lcd.print("C  ");
+    lcd.setCursor(0, 1);
+    lcd.print("Check vent & fan");
+  }
+  else if (screen == 8) {
+    lcd.setRGB(0, 120, 255);
+    lcd.print("TOO COLD: ");
+    lcd.print(sysStatus.tempVal, 1);
+    lcd.print("C ");
+    lcd.setCursor(0, 1);
+    lcd.print("Keep plants warm");
   }
 
 }
