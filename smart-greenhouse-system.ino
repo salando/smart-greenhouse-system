@@ -5,6 +5,7 @@ void setup() {
   climateSetup();
   lightSetup();
   alarmSetup();
+  netSetup();
 }
 
 void loop() {
@@ -12,4 +13,5 @@ void loop() {
   climateUpdate();
   trackSunlight();
   alarmUpdate();
+  netUpdate();
 }
