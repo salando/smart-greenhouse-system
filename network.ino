@@ -1,25 +1,22 @@
+// network.ino
+// Joins the hotspot and serves one data line per second on port 8080.
+
 #include <WiFiS3.h>
+#include "settings.h"
 
-const char* SSID = "YOUR_HOTSPOT_NAME"; // Input your hotspot name (CASE SENSITIVE)
-const char* PASS = "YOUR_PASSWORD"; // Input your hotspot password (CASE SENSITIVE)
-const int   PORT = 8080;
+const char* SSID = "YOUR_HOTSPOT_NAME";   // case sensitive, no trailing space
+const char* PASS = "YOUR_PASSWORD";       // case sensitive
+const int   NET_PORT = 8080;
 
-struct GreenhouseState {
-  float tempC;
-  int   light;
-};
+WiFiServer netServer(NET_PORT);
+WiFiClient netClient;
 
-GreenhouseState state;
-
-WiFiServer server(PORT);
-WiFiClient client;
-
-unsigned long lastSend = 0;
-const unsigned long SEND_INTERVAL = 1000;
+unsigned long netLastSend = 0;
+const unsigned long NET_SEND_INTERVAL = 1000;
 
 
 void netSetup() {
-  WiFi.config(IPAddress(172, 20, 10, 9));
+  WiFi.config(IPAddress(172, 20, 10, 9));   // fixed address, so the logger always finds it
   WiFi.begin(SSID, PASS);
 
   Serial.print("Joining ");
@@ -34,31 +31,29 @@ void netSetup() {
   Serial.print("Board IP: ");
   Serial.println(WiFi.localIP());
 
-  server.begin();
+  netServer.begin();
   Serial.print("Listening on port ");
-  Serial.println(PORT);
+  Serial.println(NET_PORT);
 }
 
 
 void netUpdate() {
   // pick up a logger if one is waiting
-  if (!client || !client.connected()) {
-    client = server.available();
-    if (client) Serial.println("Logger connected.");
+  if (!netClient || !netClient.connected()) {
+    netClient = netServer.available();
+    if (netClient) Serial.println("Logger connected.");
     return;
   }
 
   // send one line per second, without blocking
   unsigned long now = millis();
-  if (now - lastSend < SEND_INTERVAL) return;
-  lastSend = now;
+  if (now - netLastSend < NET_SEND_INTERVAL) return;
+  netLastSend = now;
 
-  client.print("D,");
-  client.print(now);
-  client.print(",");
-  client.print(state.tempC, 1);
-  client.print(",");
-  client.println(state.light);
+  netClient.print("D,");
+  netClient.print(now);
+  netClient.print(",");
+  netClient.print(sysStatus.tempVal, 1);
+  netClient.print(",");
+  netClient.println(sysStatus.lightVal);
 }
-
-
