@@ -2,14 +2,14 @@
 
 void setup() {
   displaySetup();
-  tempSetup();
+  climateSetup();
   lightSetup();
   alarmSetup();
 }
 
 void loop() {
   displayUpdate();
-  readTemp();
+  climateUpdate();
   trackSunlight();
   alarmUpdate();
 }
