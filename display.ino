@@ -143,7 +143,7 @@ void displayDraw() {
     lcd.print("SENSOR ERROR    ");
     } else {
       lcd.print("Temp: ");
-      lcd.print(temperature, 1);
+      lcd.print(sysStatus.tempVal, 1);
       lcd.print(" C    ");
       }
     lcd.setCursor(0, 1);
