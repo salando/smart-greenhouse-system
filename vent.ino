@@ -1,58 +1,54 @@
-#include <math.h>
+// vent.ino
+// Vent warning and the out-of-range alarm.
+
 #include "settings.h"
 
-const int BUZZER_PIN = 4;
-const int TEMP_PIN = A1;
-const int B_VALUE = 3975;
-const int SETPOINT = 25;
+const int VENT_BUZZER_PIN = 4;
 
-const unsigned long ALARM_DELAY_MS = 60000;
-const unsigned long MUTE_MS = 300000;
+const unsigned long ALARM_DELAY_MS = 60000;   // 60 s out of range before the alarm fires
+const unsigned long MUTE_MS        = 300000;  // 5 min mute, then it re-arms
 
-unsigned long outOfRangeStart = 0;
-unsigned long muteStart = 0;
-unsigned long lastBeep = 0;
-unsigned long lastUpdate = 0;
+unsigned long ventOutOfRangeStart = 0;
+unsigned long ventMuteStart       = 0;
+unsigned long ventLastBeep        = 0;
+
 
 void alarmSetup() {
-    pinMode(BUTTON_PIN, INPUT);
-    pinMode(BUZZER_PIN, OUTPUT);
-    Serial.begin(9600);
+  pinMode(BUTTON_PIN, INPUT);
+  pinMode(VENT_BUZZER_PIN, OUTPUT);
 }
 
+
 void alarmUpdate() {
-    unsigned long now = millis();
+  unsigned long now = millis();
 
-    int raw = analogRead(TEMP_PIN);
-    float resistance = (1023.0 - raw) * 10000.0 / raw;
-    temperature = 1.0 / (log(resistance / 10000.0) / B_VALUE + 1.0 / 298.15) - 273.15;
-    sensorError = (raw <= 0 || raw >= 1023);
+  float temp = sysStatus.tempVal;
 
-    if (!sensorError && temperature >= SETPOINT + 2) ventWarning = true;
-    if (!sensorError && temperature <= SETPOINT) ventWarning = false;
+  // Vent opens two degrees above the set point, closes back at it
+  if (!sensorError && temp >= settings.setTemp + 2) ventWarning = true;
+  if (!sensorError && temp <= settings.setTemp)     ventWarning = false;
 
-    bool outOfRange = (sensorError || temperature > SETPOINT + 4 || temperature < 15);
-    if (!outOfRange) {
-        outOfRangeStart = now;
-        alarmOn = false;
-        muted = false;
-    } else if (now - outOfRangeStart >= ALARM_DELAY_MS) {
-        alarmOn = true;
-    }
+  // Alarm condition: broken sensor, or well outside the acceptable band
+  bool outOfRange = (sensorError || temp > settings.setTemp + 4 || temp < 15);
 
-    if (alarmOn && digitalRead(BUTTON_PIN) == HIGH) {
-        muted = true;
-        muteStart = now;
-    }
-    if (muted && now - muteStart >= MUTE_MS) muted = false;
+  if (!outOfRange) {
+    ventOutOfRangeStart = now;
+    alarmOn = false;
+    muted   = false;
+  }
+  else if (now - ventOutOfRangeStart >= ALARM_DELAY_MS) {
+    alarmOn = true;
+  }
 
-    if (alarmOn && !muted && now - lastBeep >= 500) {
-        tone(BUZZER_PIN, 1000, 250);
-        lastBeep = now;
-    }
+  // Button silences the buzzer while the alarm is active
+  if (alarmOn && digitalRead(BUTTON_PIN) == HIGH) {
+    muted = true;
+    ventMuteStart = now;
+  }
+  if (muted && now - ventMuteStart >= MUTE_MS) muted = false;
 
-    if (now - lastUpdate >= 250) {
-        lastUpdate = now;
-        Serial.println(temperature, 1);
-    }
+  if (alarmOn && !muted && now - ventLastBeep >= 500) {
+    tone(VENT_BUZZER_PIN, 1000, 250);
+    ventLastBeep = now;
+  }
 }
