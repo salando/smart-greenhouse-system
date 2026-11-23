@@ -10,6 +10,6 @@ void setup() {
 void loop() {
   displayUpdate();
   readTemp();
-  trackSunlight(sysStatus.lighttime);
+  trackSunlight();
   alarmUpdate();
 }
