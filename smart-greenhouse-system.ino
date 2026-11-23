@@ -1,15 +1,19 @@
 #include "settings.h"
 
 void setup() {
+  Serial.begin(9600);
+  while (!Serial && millis() < 3000) { }
   displaySetup();
-  tempSetup();
+  climateSetup();
   lightSetup();
   alarmSetup();
+  netSetup();
 }
 
 void loop() {
   displayUpdate();
-  readTemp();
-  trackSunlight(sysStatus.lighttime);
+  climateUpdate();
+  trackSunlight();
   alarmUpdate();
+  netUpdate();
 }
