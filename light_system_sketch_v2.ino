@@ -11,7 +11,7 @@ void lightSetup() {
   digitalWrite(ledPin, LOW);
 }
 
-void trackSunlight(int& tSeconds) {
+void trackSunlight() {
   static unsigned long lastSample = 0;
   static unsigned long darkStartMs = 0;
   static bool isDarkTiming = false;
@@ -25,7 +25,7 @@ void trackSunlight(int& tSeconds) {
 
   // Count sunlight time when light is at or above threshold
   if (lightVal >= settings.darkThreshold) { 
-    tSeconds++; 
+   sysStatus.lighttime++; 
   }
 
   // 5-second debounce before turning grow light on when light drops below threshold
