@@ -63,7 +63,7 @@ void displayUpdate() {
     }
   }
   else if (screen == 1) {
-    if (press == 1) menuIndex = (menuIndex + 1) % MENU_COUNT;
+    menuIndex = dialIndex(MENU_COUNT);   // Dial scrolls the menu
     if (press == 2) {                         // Long Press
       if (menuIndex == 0) {
         screen = 2;
@@ -75,7 +75,7 @@ void displayUpdate() {
     }
   }
   else if (screen == 2) {
-    if (press == 1) menuIndex = (menuIndex + 1) % PROFILE_COUNT;
+    menuIndex = dialIndex(PROFILE_COUNT); // Dial scrolls the plant list
     if (press == 2) {
       currentProfile = menuIndex;
       settings.setTemp = PROFILES[menuIndex].temp;
@@ -188,6 +188,13 @@ void displayDraw() {
     lcd.print("Keep plants warm");
   }
 
+}
+
+
+// Picks a list item (0 to count-1) from the dial position
+int dialIndex(int count) {
+  long pos = 1023 - analogRead(ROTARY_ANGLE_SENSOR);         // Flipped to match the Set Temp direction
+  return constrain(pos * count / 1024, 0, count - 1);
 }
 
 // Returns: 0 = no press, 1 = short press, 2 = long press
