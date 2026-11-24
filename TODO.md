@@ -30,9 +30,6 @@
 - [ ] **Check that an unplugged temperature sensor is detected.**
   `climate.ino:24` only flags an error when the reading is exactly 0 or 1023. An unconnected pin may read random values instead.
   Unplug it and confirm SENSOR ERROR appears. If it doesn't, widen the check.
-- [ ] **The logger only records temperature and light** (`network.ino:53-58`).
-  Add the set point and fan, vent, grow-light and alarm state.
-  Update `parseLine` in `logger/wifi_test.cpp` at the same time: it expects exactly 4 fields, and the CSV header must match.
 - [ ] **The home screen doesn't show fan, vent or grow-light status,** and the light number has no label (`display.ino:115-126`).
 - [ ] **Remove leftover code:**
   - `sunlightSeconds` and `displayLight()` in `light_system_sketch_v2.ino` are never used.
