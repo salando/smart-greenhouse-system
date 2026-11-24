@@ -4,8 +4,8 @@
 #include <WiFiS3.h>
 #include "settings.h"
 
-const char* SSID = "YOUR_HOTSPOT_NAME";   // case sensitive, no trailing space
-const char* PASS = "YOUR_PASSWORD";       // case sensitive
+const char* SSID = "greenhouse";          // case sensitive, no trailing space
+const char* PASS = "greenhouse2026";      // case sensitive
 const int   NET_PORT = 8080;
 
 WiFiServer netServer(NET_PORT);
@@ -16,7 +16,7 @@ const unsigned long NET_SEND_INTERVAL = 1000;
 
 
 void netSetup() {
-  WiFi.config(IPAddress(172, 20, 10, 9));   // fixed address, so the logger always finds it
+  WiFi.config(IPAddress(172, 20, 10, 9));  
   WiFi.begin(SSID, PASS);
 
   Serial.print("Joining ");
@@ -50,10 +50,21 @@ void netUpdate() {
   if (now - netLastSend < NET_SEND_INTERVAL) return;
   netLastSend = now;
 
+  // D,ms,tempC,light,setTemp,fan,vent,led,alarm
   netClient.print("D,");
   netClient.print(now);
   netClient.print(",");
   netClient.print(sysStatus.tempVal, 1);
   netClient.print(",");
-  netClient.println(sysStatus.lightVal);
+  netClient.print(sysStatus.lightVal);
+  netClient.print(",");
+  netClient.print(settings.setTemp, 1);
+  netClient.print(",");
+  netClient.print(sysStatus.fanOn   ? 1 : 0);
+  netClient.print(",");
+  netClient.print(ventWarning       ? 1 : 0);
+  netClient.print(",");
+  netClient.print(sysStatus.lightOn ? 1 : 0);
+  netClient.print(",");
+  netClient.println(alarmOn         ? 1 : 0);   // println ends the line
 }
