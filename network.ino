@@ -26,14 +26,18 @@ void netSetup() {
 
   // Give up after NET_JOIN_TIMEOUT so the greenhouse still runs without WiFi
   unsigned long start = millis();
+  unsigned long time = millis();
   while (WiFi.status() != WL_CONNECTED) {
     if (millis() - start >= NET_JOIN_TIMEOUT) {
       Serial.println();
       Serial.println("No WiFi. Running without the logger.");
       return;
     }
-    delay(500);
-    Serial.print(".");
+  
+    if (millis() >= time + 500) {
+      Serial.print(".");
+      time = millis();
+      }
   }
 
   netReady = true;

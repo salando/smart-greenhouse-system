@@ -1,7 +1,7 @@
 #include "settings.h"
 
 const int lightSensorPin = A0; // Light sensor on A0
-const int ledPin = 6;          // Relay/LED on D6 (D3 is the vent servo)
+const int ledPin = 6;          // Relay/LED on D6
 const unsigned long LIGHT_ON_DELAY_MS = 5000; // 5-second wait before turning grow light on
 
 unsigned int sunlightSeconds = 0;
