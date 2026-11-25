@@ -13,6 +13,8 @@ WiFiClient netClient;
 
 unsigned long netLastSend = 0;
 const unsigned long NET_SEND_INTERVAL = 1000;
+const unsigned long NET_JOIN_TIMEOUT  = 15000;   // stop waiting for the hotspot after 15 s
+bool netReady = false;                            // true once the board has joined the hotspot
 
 
 void netSetup() {
@@ -22,11 +24,19 @@ void netSetup() {
   Serial.print("Joining ");
   Serial.println(SSID);
 
+  // Give up after NET_JOIN_TIMEOUT so the greenhouse still runs without WiFi
+  unsigned long start = millis();
   while (WiFi.status() != WL_CONNECTED) {
+    if (millis() - start >= NET_JOIN_TIMEOUT) {
+      Serial.println();
+      Serial.println("No WiFi. Running without the logger.");
+      return;
+    }
     delay(500);
     Serial.print(".");
   }
 
+  netReady = true;
   Serial.println();
   Serial.print("Board IP: ");
   Serial.println(WiFi.localIP());
@@ -38,6 +48,8 @@ void netSetup() {
 
 
 void netUpdate() {
+  if (!netReady) return;   // no WiFi, nothing to send
+
   // pick up a logger if one is waiting
   if (!netClient || !netClient.connected()) {
     netClient = netServer.available();
@@ -62,9 +74,9 @@ void netUpdate() {
   netClient.print(",");
   netClient.print(sysStatus.fanOn   ? 1 : 0);
   netClient.print(",");
-  netClient.print(ventWarning       ? 1 : 0);
+  netClient.print(sysStatus.ventWarning ? 1 : 0);
   netClient.print(",");
   netClient.print(sysStatus.lightOn ? 1 : 0);
   netClient.print(",");
-  netClient.println(alarmOn         ? 1 : 0);   // println ends the line
+  netClient.println(sysStatus.alarmOn ? 1 : 0);   // println ends the line
 }
