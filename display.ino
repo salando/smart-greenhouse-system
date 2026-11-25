@@ -64,7 +64,7 @@ void displayUpdate() {
   }
   else if (screen == 1) {
     menuIndex = dialIndex(MENU_COUNT);   // Dial scrolls the menu
-    if (press == 2) {                         // Long Press
+    if (press != 0) {                         // Short or long press selects
       if (menuIndex == 0) {
         screen = 2;
         menuIndex = 0;
@@ -76,7 +76,7 @@ void displayUpdate() {
   }
   else if (screen == 2) {
     menuIndex = dialIndex(PROFILE_COUNT); // Dial scrolls the plant list
-    if (press == 2) {
+    if (press != 0) {
       currentProfile = menuIndex;
       settings.setTemp = PROFILES[menuIndex].temp;
       settings.darkThreshold = PROFILES[menuIndex].light;
@@ -86,7 +86,7 @@ void displayUpdate() {
   }
   else if (screen == 3) {
     editValue = map(analogRead(ROTARY_ANGLE_SENSOR), 0, 1022, 70, 30) / 2.0; // Showing 15-35 degrees with 0.5 degree accuracy
-    if (press == 2) {
+    if (press != 0) {
       settings.setTemp = editValue;
       currentProfile = -1;
       screen = 1;
@@ -95,7 +95,7 @@ void displayUpdate() {
   }
   else if (screen == 4) {
     editValue = map(analogRead(ROTARY_ANGLE_SENSOR), 0, 1022, 100, 0) * 10; // Light Threshold from 0-1000 with 10 increment
-    if (press == 2) {
+    if (press != 0) {
       settings.darkThreshold = editValue;
       currentProfile = -1;
       screen = 1;
@@ -109,6 +109,13 @@ void displayUpdate() {
 }
 
 void displayDraw() {
+  // Wipe the screen when switching to a different screen, so no letters are left over
+  static int lastScreen = -1;
+  if (screen != lastScreen) {
+    lcd.clear();
+    lastScreen = screen;
+  }
+
   lcd.setCursor(0, 0);
   if (screen <= 4) lcd.setRGB(255, 255, 255);
 
