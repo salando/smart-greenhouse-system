@@ -20,6 +20,20 @@ int menuIndex = 0;
 int currentProfile = 0;             // Current Profile Selection
 double editValue = 0;               // Shows the number when editing with the Rotary Angle Sensor
 
+// After the set point changes, the TOO HOT and TOO COLD warnings wait
+// 1 minute per 10 degrees between the temperature and the new set point
+const unsigned long WAIT_PER_DEGREE_MS = 6000;
+unsigned long tempWaitStart = 0;
+unsigned long tempWaitLength = 0;
+
+// Call this whenever the set point changes
+void startTempWait() {
+  float degreesOff = sysStatus.tempVal - settings.setTemp;
+  if (degreesOff < 0) degreesOff = -degreesOff;   // same wait whether it's too hot or too cold
+  tempWaitStart = millis();
+  tempWaitLength = degreesOff * WAIT_PER_DEGREE_MS;
+}
+
 void displaySetup() {
   pinMode(BUTTON_PIN, INPUT);
   lcd.begin(16, 2);
@@ -41,11 +55,13 @@ void displayUpdate() {
     if (sysStatus.tempVal >= 15) coldDismissed = false;
   }
 
+  bool tempWaiting = millis() - tempWaitStart < tempWaitLength;   // still giving it time to adjust
+
   if (sysStatus.alarmOn) screen = 5;
   else if (screen == 5) screen = 0;
   else if (sysStatus.sensorError && !sensorDismissed) screen = 6;
-  else if (!sysStatus.sensorError && sysStatus.ventWarning && !hotDismissed) screen = 7;
-  else if (!sysStatus.sensorError && sysStatus.tempVal < 15 && !coldDismissed) screen = 8;
+  else if (!sysStatus.sensorError && sysStatus.ventWarning && !hotDismissed && !tempWaiting) screen = 7;
+  else if (!sysStatus.sensorError && sysStatus.tempVal < 15 && !coldDismissed && !tempWaiting) screen = 8;
   else if (screen >= 6) screen = 0;
 
   if (screen >= 6) {
@@ -80,6 +96,7 @@ void displayUpdate() {
       currentProfile = menuIndex;
       settings.setTemp = PROFILES[menuIndex].temp;
       settings.darkThreshold = PROFILES[menuIndex].light;
+      startTempWait();
       screen = 1;
       menuIndex = 0;
     }
@@ -88,6 +105,7 @@ void displayUpdate() {
     editValue = map(analogRead(ROTARY_ANGLE_SENSOR), 0, 1022, 70, 30) / 2.0; // Showing 15-35 degrees with 0.5 degree accuracy
     if (press != 0) {
       settings.setTemp = editValue;
+      startTempWait();
       currentProfile = -1;
       screen = 1;
       menuIndex = 1;

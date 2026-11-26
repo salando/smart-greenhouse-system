@@ -9,7 +9,7 @@
 // ======================= CLIMATE CONTROL SETTINGS =======================
 
 const int TEMP_PIN  = A1;            // The temperature sensor is plugged into analog port A1
-const int RELAY_PIN = 7;             // The relay (our "fan") is plugged into digital port D7
+const int RELAY_PIN = 5;             // The relay (our "fan") is plugged into digital port D7
 
 const int   B_VALUE   = 3975;        // A constant for this Grove temperature sensor, from the Lab 3 code
 const float DEAD_BAND = 2.0;         // Fan turns OFF only after it cools 2 C below the set-point (stops flicker)

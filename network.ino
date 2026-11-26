@@ -83,7 +83,7 @@ void netUpdate() {
   line += String(sysStatus.lightVal) + ",";
   line += String(settings.setTemp, 1) + ",";
   line += String(sysStatus.fanOn ? 1 : 0) + ",";
-  line += String(sysStatus.ventWarning ? 1 : 0) + ",";
+  line += String(sysStatus.ventOpen ? 1 : 0) + ",";
   line += String(sysStatus.lightOn ? 1 : 0) + ",";
   line += String(sysStatus.alarmOn ? 1 : 0);
   netClient.println(line);

@@ -38,14 +38,14 @@ void alarmUpdate() {
     }
 
   // Move the servo and share the vent state with the LCD and logger
-    if (sysStatus.ventWarning) {
+    sysStatus.ventOpen = sysStatus.fanOn;
+
+    if (sysStatus.ventOpen) {
     ventServo.write(VENT_OPEN);     // 90 degrees
-    } 
+    }
     else {
     ventServo.write(VENT_CLOSED);   // 0 degrees
     }
-
-    sysStatus.ventOpen = sysStatus.ventWarning;
 
   // Alarm conditions
     bool outOfRange = (sysStatus.sensorError || temp > settings.setTemp + 4 || temp < 15);
