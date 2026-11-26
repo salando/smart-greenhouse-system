@@ -6,7 +6,7 @@ const int VENT_SERVO_PIN  = 3;
 const int VENT_CLOSED     = 0;    // servo angle when closed
 const int VENT_OPEN       = 90;   // servo angle when open
 
-const unsigned long ALARM_DELAY_MS = 900000;   
+const unsigned long ALARM_DELAY_MS = 6000;   
 const unsigned long MUTE_MS        = 600000; 
 
 Servo ventServo;
@@ -30,8 +30,12 @@ void alarmUpdate() {
     float temp = sysStatus.tempVal;
 
   // Vent opens two degrees above the set point, closes back at it
-    if (!sysStatus.sensorError && temp >= settings.setTemp + 2) sysStatus.ventWarning = true;
-    if (!sysStatus.sensorError && temp <= settings.setTemp)     sysStatus.ventWarning = false;
+    if (!sysStatus.sensorError && temp >= settings.setTemp + 2) {
+        sysStatus.ventWarning = true;
+    }
+    if (!sysStatus.sensorError && temp <= settings.setTemp) {
+        sysStatus.ventWarning = false;
+    }
 
   // Move the servo and share the vent state with the LCD and logger
     if (sysStatus.ventWarning) {
